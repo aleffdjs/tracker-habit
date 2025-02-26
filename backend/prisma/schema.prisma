@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Habit {
+  id          Int      @id @default(autoincrement())
+  name        String
+  category    String
+  isActive    Boolean  @default(true)
+  description String?  // Descrição opcional do hábito
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  records     Record[] @relation("HabitRecords")
+}
+
+model Record {
+  id        Int       @id @default(autoincrement())
+  habitId   Int
+  date      DateTime  @db.Date    // Apenas a data, sem hora
+  completed Boolean   @default(true)
+  notes     String?   // Notas opcionais para o registro
+  createdAt DateTime  @default(now())
+  habit     Habit    @relation("HabitRecords", fields: [habitId], references: [id])
+
+  @@unique([habitId, date]) // Impede registros duplicados no mesmo dia
+}
